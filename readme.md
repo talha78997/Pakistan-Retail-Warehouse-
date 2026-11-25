@@ -1,0 +1,87 @@
+# **PakRetail DW**
+
+## **Retail Sales and Cash-on-Delivery Intelligence in Pakistan**
+
+**Student Name:** Talha Ahmad\
+**Roll Number:** F2023-813\
+**Course:** Data Warehousing\
+**Semester:** 7
+
+## **1. Problem Statement**
+
+A fictional Pakistani retail business operates across Lahore, Karachi, Islamabad, Faisalabad, Multan and Peshawar. Orders, customer information, products and branch records are held in separate files. Management cannot easily compare sales across cities, identify categories with the highest revenue or understand the financial impact of unsuccessful cash-on-delivery (COD) orders. The project addresses this fragmentation by building a centralized analytical warehouse and a repeatable ETL process. A supplementary classification model estimates delivery failure risk using information available at checkout.
+
+## **2. Objectives and Scope**
+
+- Integrate and validate orders, customers, products and branches in a star schema.
+- Provide monthly revenue, city performance, category ranking and payment failure reports using Spark SQL.
+- Demonstrate Spark driver/executor concepts, lazy execution, RDD MapReduce and MLlib pipelines.
+- Identify high-risk orders for manual confirmation, without automatic rejection.
+
+## **3. Dataset and Provenance**
+
+The notebook generates 20,000 fictional orders for 2025, 1,000 customers, 60 products and six branches, plus 100 repeated rows. Prices are in Pakistani rupees (PKR). Payment methods are COD, card and wallet. Missing discounts, inconsistent payment labels and ten invalid quantities are injected deliberately. No actual company records are supplied. The generated failure label depends on simulated checkout factors and random noise; it does not represent measured Pakistani consumer behavior.
+
+## **4. Warehouse Design and Architecture**
+
+Source CSV / JSON → staging and quality checks → Parquet star schema → SQL analytical marts → charts and MLlib model.
+
+The fact table contains one order with one product. The four dimension tables provide descriptive attributes. This batch prototype uses full refresh and Type 1 dimension snapshots.
+
+| Table        | Key         | Purpose                                                                         |
+| ------------ | ----------- | ------------------------------------------------------------------------------- |
+| fact_orders  | order_id    | Quantity, checkout price, discount, payment, failed, revenue; four foreign keys |
+| dim_date     | date_key    | Date, year, quarter, month                                                      |
+| dim_customer | customer_id | Customer segment                                                                |
+| dim_product  | product_id  | Product name and category                                                       |
+| dim_branch   | branch_id   | City and province                                                               |
+
+## **5. ETL and Data Quality**
+
+Extract CSV/JSON, inspect data, remove exact duplicates, normalize payment strings, cast dates, fill missing discounts with zero under the simulation rule and quarantine invalid rows. Validate unique keys, foreign keys and revenue reconciliation. Store dimensional tables in Parquet and register SQL views.
+
+Expected accepted records: 19,990 (20,100 raw rows minus 100 duplicates and 10 invalid rows).
+
+## **6. Analytical Questions**
+
+- Which cities generate the highest recognized revenue?
+- How does revenue change month by month and quarter by quarter?
+- Which categories rank highest within each city?
+- How do COD, card and wallet failure rates compare?
+- Which COD city/category combinations need further investigation?
+
+**Revenue proxy:** Net order value for successful deliveries.
+
+**Net value:** Quantity × unit price × (1 − discount / 100).
+
+**Failure rate:** Failed orders / total orders.
+
+Failed order value is not actual profit loss.
+
+## **7. Predictive Analysis and Evaluation**
+
+The optional MLlib extension compares logistic regression and random forest. StringIndexer, OneHotEncoder, VectorAssembler and StandardScaler are fitted only on training data.
+
+January–September is training, October validation and November–December testing. Model selection uses validation PR-AUC; the selected model is evaluated on test with ROC-AUC, PR-AUC, accuracy, F1, precision, recall and confusion matrix.
+
+Post-delivery complaints and recognized revenue are excluded to avoid leakage. A majority-class baseline is reported.
+
+## **8. Expected Business Value and Limitations**
+
+The warehouse supports sales reporting and order-confirmation prioritization. A production rollout would need real data, privacy and access controls, incremental loads, a distributed storage system, monitoring and a controlled pilot measuring incremental successful deliveries against confirmation costs.
+
+Colab is local Spark, not a multi-node cluster; the synthetic dataset demonstrates functionality, not actual business performance. The notebook generates metrics and charts when run; no unverified numerical model results are presented.
+
+## **9. Course Alignment**
+
+Big Data foundations and architecture: Unit 1, lecture 1, Big Data Analytics Lecture Notes, and Apache Spark Driver Worker Architecture.
+
+Practical data engineering: lecture 3 examples, Examples explained, Data Munging with Python and Comprehensive PySpark.
+
+Applied analytics and ML: PySpark Big Data Analytics, Complete Short Project, RDD and MLlib, and MLlib Distributed lectures.
+
+The repository README provides the full file-by-file mapping. Star schema and OLAP are project-specific extensions.
+
+## **10. Deliverables**
+
+Google Colab notebook, this Word report and a GitHub-ready repository with README, dependencies, environment YAML, validation workflow and reproducible data generation.
